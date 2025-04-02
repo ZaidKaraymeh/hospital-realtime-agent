@@ -1,0 +1,11 @@
+{
+    "name": "dispatchRule",
+    "trunk_ids": [
+        "ST_EfCwEL55HygS"
+    ],
+    "rule": {
+        "dispatchRuleIndividual": {
+        "roomPrefix": "call-"
+        }
+    }
+}
