@@ -13,7 +13,8 @@ from livekit.agents import (
 )
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
-from prompt import AGENT_PROMPT
+from prompt import AGENT_PROMPT, WELCOME_MESSAGE
+from api import AssistantFnc, WorkflowsEnum
 
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("my-worker")
@@ -33,30 +34,37 @@ async def entrypoint(ctx: JobContext):
 
 def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     logger.info("starting multimodal agent")
-
+    _tools = AssistantFnc()
     model = openai.realtime.RealtimeModel(
-        voice="coral",
+        voice="ballad",
         instructions=AGENT_PROMPT,
         modalities=["audio", "text"],
     )
 
-    # create a chat context with chat history, these will be synchronized with the server
-    # upon session establishment
-    chat_ctx = llm.ChatContext()
-    chat_ctx.append(
-        text="مرحبًا بك في مستشفى النور. كيف يمكنني مساعدتك اليوم؟ هل ترغب في حجز موعد أو فتح ملف مريض جديد؟",
-        role="assistant",
-    )
-
     agent = MultimodalAgent(
         model=model,
-        chat_ctx=chat_ctx,
+        fnc_ctx=_tools,
+
     )
     agent.start(ctx.room, participant)
 
-    # to enable the agent to speak first
-    agent.generate_reply()
+    session = model.sessions[0]
+    session.conversation.item.create(
+        llm.ChatMessage(
+            role="assistant",
+            content=WELCOME_MESSAGE
+        )
+    )
+    session.response.create()
 
+    @session.on("user_speech_committed")
+    def on_user_speech_committed(event: llm.ChatMessage):
+        if isinstance(event.content, list):
+            event.content = "\n".join(
+                "[image]" if isinstance(x, llm.ChatImage) else x for x in event
+            )
+
+        logger.info(f"Current workflow: {_tools._current_workflow}")
 
 if __name__ == "__main__":
     cli.run_app(
