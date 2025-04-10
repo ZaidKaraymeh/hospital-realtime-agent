@@ -13,7 +13,7 @@ from livekit.agents import (
 )
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
-from prompt import AGENT_PROMPT
+from prompt import AGENT_PROMPT, WELCOME_MESSAGE
 
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("my-worker")
@@ -35,7 +35,7 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     logger.info("starting multimodal agent")
 
     model = openai.realtime.RealtimeModel(
-        voice="coral",
+        voice="ash",
         instructions=AGENT_PROMPT,
         modalities=["audio", "text"],
     )
@@ -56,6 +56,15 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
 
     # to enable the agent to speak first
     agent.generate_reply()
+
+    # session = model.sessions[0]
+    # session.conversation.item.create(
+    #     llm.ChatMessage(
+    #         role="assistant",
+    #         content=WELCOME_MESSAGE
+    #     )
+    # )
+    # session.response.create()
 
 
 if __name__ == "__main__":
