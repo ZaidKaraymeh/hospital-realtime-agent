@@ -13,7 +13,7 @@ from livekit.agents import (
 )
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
-from prompt import AGENT_PROMPT, WELCOME_MESSAGE
+from hospital_prompt import AGENT_PROMPT, WELCOME_MESSAGE
 
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("my-worker")
